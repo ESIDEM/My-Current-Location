@@ -5,12 +5,15 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -61,9 +64,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun formatLocation(lat:Double,long:Double){
+
+        val geocoder = Geocoder(this, Locale.getDefault())
+        var addressList:List<Address>
+        addressList = geocoder.getFromLocation(lat,long,1)
+
+        var address = addressList.get(0).getAddressLine(0)
+        var city = addressList.get(0).locality
+        var state = addressList.get(0).adminArea
+        var country = addressList.get(0).countryName
+        var postTalCode = addressList.get(0).postalCode
+        var knownName = addressList.get(0).featureName
+
+        latlong.text = "You are at ${address}, ${city}, ${state}. ${country} with Postal Code: ${postTalCode} also know as ${knownName}"
+    }
+
     private fun startLocationUpdate() {
         locationViewModel.getLocationData().observe(this, Observer {
-            latlong.text =  getString(R.string.latLong, it.longitude, it.latitude)
+            //latlong.text =  getString(R.string.latLong, it.longitude, it.latitude)
+
+            formatLocation(it.latitude,it.longitude)
         })
     }
 
